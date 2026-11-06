@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 WORKDIR /app
 COPY service/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
 COPY service/app.py service/schema.json ./
 COPY service/schema.json ./service/schema.json
 ENV PYTHONUNBUFFERED=1

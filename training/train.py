@@ -21,8 +21,12 @@ if tok.pad_token is None:
 class DS(Dataset):
     def __len__(self): return len(texts)
     def __getitem__(self, i):
-        ids = tok(texts[i], truncation=True, max_length=cfg["max_seq_length"])["input_ids"]
-        return {"input_ids": ids, "labels": list(ids)}
+        ids = tok(texts[i], truncation=True, max_length=cfg["max_seq_length"], padding="max_length")["input_ids"]
+        labels = list(ids)
+        for j, t in enumerate(labels):
+            if t == tok.pad_token_id:
+                labels[j] = -100
+        return {"input_ids": ids, "labels": labels}
 model = AutoModelForCausalLM.from_pretrained(cfg["model"], torch_dtype=torch.float32)
 out = os.environ.get("OUT", "models/v1")
 args = TrainingArguments(output_dir="training/out", per_device_train_batch_size=cfg["batch_size"], num_train_epochs=cfg["epochs"], learning_rate=cfg["learning_rate"], logging_steps=5, save_strategy="no", seed=cfg["seed"], report_to=[], remove_unused_columns=False)
@@ -30,11 +34,6 @@ trainer = Trainer(model=model, args=args, train_dataset=DS(), data_collator=Data
 trainer.train()
 os.makedirs(out, exist_ok=True)
 model.save_pretrained(out); tok.save_pretrained(out)
-losses = [(h.get("epoch"), h.get("loss")) for h in trainer.state.log_history if "loss" in h]
-with open("training/loss.csv", "w", newline="") as f:
-    w = csv.writer(f); w.writerow(["epoch", "loss"])
-    for e, l in losses: w.writerow([e, l])
-print("saved to", out, "loss rows:", losses)
 losses = [(h.get("epoch"), h.get("loss")) for h in trainer.state.log_history if "loss" in h]
 with open("training/loss.csv", "w", newline="") as f:
     w = csv.writer(f); w.writerow(["epoch", "loss"])

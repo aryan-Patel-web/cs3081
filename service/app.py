@@ -2,6 +2,8 @@ import os, json, re
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 import torch
+torch.set_num_threads(1)
+torch.set_num_interop_threads(1)
 from transformers import AutoModelForCausalLM, AutoTokenizer
 MODEL_URI = os.environ.get("MODEL_URI", "models/v1")
 MODEL_VERSION = os.environ.get("MODEL_VERSION", "v1")

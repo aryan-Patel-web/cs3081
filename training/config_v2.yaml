@@ -1,0 +1,11 @@
+seed: 43
+learning_rate: 0.00005
+batch_size: 4
+epochs: 1
+max_seq_length: 128
+model: EleutherAI/pythia-70m
+torch: 2.15.0+cpu
+transformers: 5.22.2
+datasets: 5.1.0
+accelerate: 1.15.0
+python: 3.12
